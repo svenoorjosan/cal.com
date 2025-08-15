@@ -1,5 +1,6 @@
 import authedProcedure from "../../procedures/authedProcedure";
 import { router } from "../../trpc";
+import { waitingRoomRouter } from "../waitingRoom";
 import { ZAddNotificationsSubscriptionInputSchema } from "./addNotificationsSubscription.schema";
 import { ZAddSecondaryEmailInputSchema } from "./addSecondaryEmail.schema";
 import { ZConnectAndJoinInputSchema } from "./connectAndJoin.schema";
@@ -71,4 +72,5 @@ export const loggedInViewerRouter = router({
     const { markNoShow } = await import("./markNoShow.handler");
     return markNoShow(opts);
   }),
+  waitingRoom: waitingRoomRouter,
 });

@@ -470,7 +470,13 @@ function BookingListItem(booking: BookingItemProps) {
   const isCalVideoLocation =
     !booking.location || booking.location === "integrations:daily" || booking?.location?.trim() === "";
 
+  // ⬇️ ADD: host joining link inside Video options (kept as you placed)
   const videoOptionsActions: ActionType[] = [
+    {
+      id: "join_as_host",
+      label: "Join as host",
+      href: `/dev/waiting-room/${booking.uid}?host=1`,
+    },
     {
       id: "view_recordings",
       label: showCheckRecordingButton ? t("check_for_recordings") : t("view_recordings"),
@@ -491,6 +497,25 @@ function BookingListItem(booking: BookingItemProps) {
   ];
 
   const showPendingPayment = paymentAppData.enabled && booking.payment.length && !booking.paid;
+
+  // ⬇️ ADD: row actions to open the waiting room (booker + host)
+  if (isCalVideoLocation) {
+    const waitingRoomUrl = `/dev/waiting-room/${booking.uid}`;
+    bookedActions.push(
+      {
+        id: "open_waiting_room",
+        label: t("join_meeting"),
+        href: waitingRoomUrl,
+        icon: "external-link" as const,
+      },
+      {
+        id: "open_waiting_room_host",
+        label: "Join as host",
+        href: `${waitingRoomUrl}?host=1`,
+        icon: "external-link" as const,
+      }
+    );
+  }
 
   return (
     <>
@@ -1255,16 +1280,6 @@ const GroupedGuests = ({ guests }: { guests: AttendeeProps[] }) => {
               {t("email")}
             </Button>
           </Link>
-          <Button
-            color="secondary"
-            disabled={selectedEmail.length === 0}
-            onClick={(e) => {
-              e.preventDefault();
-              copyToClipboard(selectedEmail);
-              showToast(t("email_copied"), "success");
-            }}>
-            {!isCopied ? t("copy") : t("copied")}
-          </Button>
         </div>
       </DropdownMenuContent>
     </Dropdown>

@@ -18,6 +18,7 @@ export const ENDPOINTS = [
   "eventTypes",
   "features",
   "highPerf",
+  "loggedInViewer",
   "i18n",
   "insights",
   "me",

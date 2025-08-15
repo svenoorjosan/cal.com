@@ -256,9 +256,7 @@ function buildNewBookingData(params: CreateBookingParams) {
     },
     destinationCalendar:
       evt.destinationCalendar && evt.destinationCalendar.length > 0
-        ? {
-            connect: { id: evt.destinationCalendar[0].id },
-          }
+        ? { connect: { id: evt.destinationCalendar[0].id } }
         : undefined,
 
     routedFromRoutingFormReponse: routingFormResponseId
@@ -279,6 +277,7 @@ function buildNewBookingData(params: CreateBookingParams) {
       ...(typeof originalRescheduledBooking.metadata === "object" && originalRescheduledBooking.metadata),
       ...reqBody.metadata,
     };
+
     newBookingData.paid = originalRescheduledBooking.paid;
     newBookingData.fromReschedule = originalRescheduledBooking.uid;
     if (originalRescheduledBooking.uid) {
@@ -301,15 +300,28 @@ function buildNewBookingData(params: CreateBookingParams) {
 
     if (!evt.seatsPerTimeSlot && originalRescheduledBooking?.uid) {
       originalBookingUpdateDataForCancellation = {
-        where: {
-          id: originalRescheduledBooking.id,
-        },
-        data: {
-          rescheduled: true,
-          status: BookingStatus.CANCELLED,
-          rescheduledBy: rescheduledBy,
-        },
+        where: { id: originalRescheduledBooking.id },
+        data: { rescheduled: true, status: BookingStatus.CANCELLED, rescheduledBy: rescheduledBy },
       };
+    }
+  }
+
+  // Enable waiting room for Cal Video / Daily bookings (run AFTER any metadata merges)
+  {
+    const loc = evt.location as any;
+    const locStr = typeof loc === "string" ? loc : loc?.type || loc?.provider || "";
+    const isCalVideo = /cal.?video|daily/i.test(String(locStr));
+
+    if (isCalVideo) {
+      const base = (newBookingData.metadata ?? {}) as any;
+      newBookingData.metadata = {
+        ...base,
+        waitingRoom: {
+          ...(base.waitingRoom ?? {}),
+          enabled: true,
+          hostJoinedAt: null,
+        },
+      } as any;
     }
   }
 
@@ -326,19 +338,11 @@ function buildNewBookingData(params: CreateBookingParams) {
     reroutingFormResponses: z.infer<typeof routingFormResponseInDbSchema> | null;
     routingFormResponseId: number | undefined | null;
   }) {
-    if (!routingFormResponseId) {
-      return null;
-    }
-
-    if (!reroutingFormResponses) {
-      return null;
-    }
-
+    if (!routingFormResponseId) return null;
+    if (!reroutingFormResponses) return null;
     return {
       where: { id: routingFormResponseId },
-      data: {
-        response: reroutingFormResponses,
-      },
+      data: { response: reroutingFormResponses },
     };
   }
 }

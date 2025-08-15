@@ -3,6 +3,7 @@
  */
 import { router } from "../trpc";
 import { viewerRouter } from "./viewer/_router";
+import { waitingRoomRouter } from "./waitingRoom";
 
 /**
  * Create your application's root router
@@ -12,6 +13,7 @@ import { viewerRouter } from "./viewer/_router";
  */
 export const appRouter = router({
   viewer: viewerRouter,
+  waitingRoom: waitingRoomRouter,
 });
 
 export type AppRouter = typeof appRouter;

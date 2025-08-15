@@ -5,13 +5,20 @@ import { initTRPC } from "@trpc/server";
 import type { createContextInner } from "./createContext";
 import { errorFormatter } from "./errorFormatter";
 
-export const tRPCContext = initTRPC.context<typeof createContextInner>().create({
+const t = initTRPC.context<typeof createContextInner>().create({
   transformer: superjson,
   errorFormatter,
 });
 
-export const router = tRPCContext.router;
-export const mergeRouters = tRPCContext.mergeRouters;
-export const middleware = tRPCContext.middleware;
-export const procedure = tRPCContext.procedure;
-export const createCallerFactory = tRPCContext.createCallerFactory;
+// Keep old name for compatibility with files like procedures/publicProcedure.ts
+export const tRPCContext = t;
+
+export const router = t.router;
+export const mergeRouters = t.mergeRouters;
+export const middleware = t.middleware;
+export const procedure = t.procedure;
+
+// Nice explicit export many files expect
+export const publicProcedure = t.procedure;
+
+export const createCallerFactory = t.createCallerFactory;
